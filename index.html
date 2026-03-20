@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仙门试炼 - 视觉小说版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: bgShift 10s ease infinite;
+        }
+        
+        @keyframes bgShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(10deg); }
+        }
+        
+        /* 场景背景层 */
+        .scene-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1s ease;
+        }
+        
+        .scene-plaza {
+            background: 
+                linear-gradient(to bottom, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%),
+                repeating-linear-gradient(90deg, transparent 0, transparent 50px, rgba(255,255,255,0.05) 50px, rgba(255,255,255,0.05) 51px),
+                linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
+        }
+        
+        .scene-cave {
+            background: 
+                linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(50,30,80,0.5) 100%),
+                radial-gradient(circle at 50% 30%, rgba(255,215,0,0.3) 0%, transparent 40%),
+                linear-gradient(135deg, #2c1e4a 0%, #1a0f2e 100%);
+        }
+        
+        .scene-bamboo {
+            background: 
+                linear-gradient(to bottom, rgba(100, 180, 100, 0.3) 0%, rgba(50, 100, 50, 0.3) 100%),
+                repeating-linear-gradient(90deg, rgba(34, 139, 34, 0.2) 0, rgba(34, 139, 34, 0.2) 30px, transparent 30px, transparent 60px),
+                linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+        
+        /* 角色层 */
+        .character-layer {
+            position: absolute;
+            bottom: 30%;
+            width: 100%;
+            height: 40%;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 50px;
+            padding: 0 10%;
+        }
+        
+        .character {
+            position: relative;
+            transition: all 0.5s ease;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        
+        .character.active {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+        
+        .character.hidden {
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+        
+        /* CSS 绘制角色 - 林萧 */
+        .char-linxiao {
+            width: 120px;
+            height: 280px;
+            position: relative;
+        }
+        
+        .char-linxiao .head {
+            width: 60px;
+            height: 70px;
+            background: linear-gradient(135deg, #f5d0c5 0%, #e8b4a8 100%);
+            border-radius: 30px 30px 35px 35px;
+            position: absolute;
+            top: 0;
+            left: 30px;
+            z-index: 3;
+        }
+        
+        .char-linxiao .hair {
+            width: 70px;
+            height: 80px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 35px 35px 20px 20px;
+            position: absolute;
+            top: -5px;
+            left: 25px;
+            z-index: 4;
+        }
+        
+        .char-linxiao .hair::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 60px;
+            background: #1a1a2e;
+            top: 20px;
+            left: -10px;
+            border-radius: 10px;
+        }
+        
+        .char-linxiao .eye {
+            width: 8px;
+            height: 5px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
+            z-index: 5;
+        }
+        
+        .char-linxiao .eye.left { left: 38px; }
+        .char-linxiao .eye.right { right: 38px; }
+        
+        .char-linxiao .body {
+            width: 80px;
+            height: 140px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            border-radius: 20px 20px 10px 10px;
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            z-index: 2;
+        }
+        
+        .char-linxiao .body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.3) 50%, transparent 100%);
+            top: 10px;
+        }
+        
+        .char-linxiao .robe-decoration {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+            border: 2px solid rgba(255,215,0,0.3);
+            border-top: none;
+            top: 80px;
+            left: 30px;
+            border-radius: 0 0 30px 30px;
+        }
+        
+        .char-linxiao .legs {
+            width: 60px;
+            height: 70px;
+            background: linear-gradient(180deg, #1a252f 0%, #0f151a 100%);
+            position: absolute;
+            top: 210px;
+            left: 30px;
+            z-index: 1;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+        }
+        
+        .char-linxiao .aura {
+            position: absolute;
+            width: 150px;
+            height: 300px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            top: -20px;
+            left: -15px;
+            animation: aura 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes aura {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+        
+        /* CSS 绘制角色 - 苏清雪 */
+        .char-qingxue {
+            width: 120px;
+            height: 300px;
+            position: relative;
+        }
+        
+        .char-qingxue .head {
+            width: 55px;
+            height: 65px;
+            background: linear-gradient(135deg, #fff5f0 0%, #f5e6e0 100%);
+            border-radius: 28px 28px 32px 32px;
+            position: absolute;
+            top: 0;
+            left: 32px;
+            z-index: 3;
+        }
+        
+        .char-qingxue .hair {
+            width: 75px;
+            height: 120px;
+            background: linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%);
+            border-radius: 40px 40px 30px 30px;
+            position: absolute;
+            top: -10px;
+            left: 22px;
+            z-index: 4;
+        }
+        
+        .char-qingxue .hair::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 100px;
+            background: #0f0f1a;
+            top: 30px;
+            right: -15px;
+            border-radius: 10px;
+        }
+        
+        .char-qingxue .hair-ornament {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #fff 0%, #e0e0e0 100%);
+            border-radius: 50%;
+            top: 10px;
+            left: 35px;
+            z-index: 5;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+        
+        .char-qingxue .eye {
+            width: 7px;
+            height: 4px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            position: absolute;
+            top: 28px;
+            z-index: 5;
+        }
+        
+        .char-qingxue .eye.left { left: 40px; }
+        .char-qingxue .eye.right { right: 40px; }
+        
+        .char-qingxue .body {
+            width: 90px;
+            height: 160px;
+            background: linear-gradient(180deg, #fff 0%, #f0f0f0 50%, #e0e0e0 100%);
+            border-radius: 25px 25px 15px 15px;
+            position: absolute;
+            top: 65px;
+            left: 15px;
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+        
+        .char-qingxue .robe-sleeves {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+            top: 70px;
+            left: -15px;
+            border-radius: 40px;
+        }
+        
+        .char-qingxue .legs {
+            width: 70px;
+            height: 75px;
+            background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%);
+            position: absolute;
+            top: 225px;
+            left: 25px;
+            z-index: 1;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+        }
+        
+        .char-qingxue .aura {
+            position: absolute;
+            width: 160px;
+            height: 320px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            top: -20px;
+            left: -20px;
+            animation: aura-white 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes aura-white {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+        }
+        
+        /* CSS 绘制角色 - 老乞丐 */
+        .char-beggar {
+            width: 120px;
+            height: 280px;
+            position: relative;
+        }
+        
+        .char-beggar .head {
+            width: 65px;
+            height: 75px;
+            background: linear-gradient(135deg, #e8c4b8 0%, #d4a898 100%);
+            border-radius: 32px 32px 38px 38px;
+            position: absolute;
+            top: 0;
+            left: 27px;
+            z-index: 3;
+        }
+        
+        .char-beggar .hair {
+            width: 70px;
+            height: 40px;
+            background: linear-gradient(180deg, #c0c0c0 0%, #a0a0a0 100%);
+            border-radius: 35px 35px 10px 10px;
+            position: absolute;
+            top: 0;
+            left: 25px;
+            z-index: 4;
+        }
+        
+        .char-beggar .beard {
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(180deg, #d0d0d0 0%, #a0a0a0 100%);
+            border-radius: 25px 25px 30px 30px;
+            position: absolute;
+            top: 45px;
+            left: 35px;
+            z-index: 4;
+        }
+        
+        .char-beggar .eye {
+            width: 6px;
+            height: 6px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            position: absolute;
+            top: 32px;
+            z-index: 5;
+        }
+        
+        .char-beggar .eye.left { left: 40px; }
+        .char-beggar .eye.right { right: 40px; }
+        
+        .char-beggar .body {
+            width: 85px;
+            height: 130px;
+            background: linear-gradient(180deg, #8b7355 0%, #6b5344 50%, #5a4236 100%);
+            border-radius: 20px 20px 10px 10px;
+            position: absolute;
+            top: 75px;
+            left: 17px;
+            z-index: 2;
+        }
+        
+        .char-beggar .robe-patches {
+            position: absolute;
+            width: 80px;
+            height: 120px;
+            top: 80px;
+            left: 20px;
+            z-index: 3;
+        }
+        
+        .char-beggar .patch {
+            position: absolute;
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        
+        .char-beggar .patch:nth-child(1) { width: 20px; height: 25px; top: 10px; left: 10px; }
+        .char-beggar .patch:nth-child(2) { width: 15px; height: 20px; top: 40px; right: 15px; }
+        .char-beggar .patch:nth-child(3) { width: 18px; height: 22px; top: 70px; left: 25px; }
+        
+        .char-beggar .gourd {
+            position: absolute;
+            width: 30px;
+            height: 45px;
+            background: linear-gradient(180deg, #c4a35a 0%, #a08040 100%);
+            border-radius: 15px 15px 20px 20px;
+            top: 100px;
+            right: -20px;
+            z-index: 4;
+            transform: rotate(15deg);
+        }
+        
+        .char-beggar .legs {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(180deg, #5a4236 0%, #4a3226 100%);
+            position: absolute;
+            top: 205px;
+            left: 27px;
+            z-index: 1;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+        }
+        
+        /* 对话框层 - 修复滚动 */
+        .dialogue-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 40px;
+            z-index: 50;
+        }
+        
+        .speaker-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.5);
+            flex-shrink: 0;
+        }
+        
+        .dialogue-box {
+            flex: 1;
+            overflow-y: auto;
+            color: #fff;
+            font-size: 18px;
+            line-height: 1.6;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            padding-right: 10px;
+        }
+        
+        .dialogue-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .dialogue-box::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        
+        .dialogue-box::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        .dialogue-text {
+            white-space: pre-line;
+        }
+        
+        /* 选择按钮层 - 修复位置 */
+        .choices-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+            width: 90%;
+            max-width: 500px;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .choice-btn {
+            padding: 18px 30px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 280px;
+            text-align: center;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        
+        .choice-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, rgba(118, 75, 162, 0.95) 0%, rgba(102, 126, 234, 0.95) 100%);
+            border-color: rgba(255,255,255,0.6);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .choice-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* 标题层 */
+        .title-layer {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            z-index: 100;
+        }
+        
+        .title-layer h1 {
+            font-size: 28px;
+            color: white;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            margin-bottom: 5px;
+        }
+        
+        .title-layer p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* 菜单按钮 */
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            padding: 8px 18px;
+            border-radius: 20px;
+            color: white;
+            font-size: 13px;
+            z-index: 100;
+        }
+        
+        /* 渐入动画 */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* 角色出场动画 */
+        .slide-in-left {
+            animation: slideInLeft 0.8s ease;
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-200px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.8s ease;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(200px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* 提示文字 */
+        .continue-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            animation: blink 1.5s ease infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- 场景层 -->
+        <div class="scene-layer scene-plaza" id="sceneLayer"></div>
+        
+        <!-- 标题 -->
+        <div class="title-layer">
+            <h1>📖 仙门试炼</h1>
+            <p>视觉小说版</p>
+        </div>
+        
+        <!-- 进度条 -->
+        <div class="progress-bar">
+            第 <span id="chapterNum">1</span> 章
+        </div>
+        
+        <!-- 菜单按钮 -->
+        <button class="menu-btn" onclick="toggleMenu()">☰ 菜单</button>
+        
+        <!-- 角色层 -->
+        <div class="character-layer" id="characterLayer"></div>
+        
+        <!-- 选择按钮层 -->
+        <div class="choices-layer" id="choicesLayer"></div>
+        
+        <!-- 对话框层 -->
+        <div class="dialogue-layer">
+            <div class="speaker-name" id="speakerName">旁白</div>
+            <div class="dialogue-box">
+                <div class="dialogue-text" id="dialogueText"></div>
+            </div>
+            <div class="continue-hint" id="continueHint">点击继续 ▼</div>
+        </div>
+    </div>
+
+    <script>
+        // 剧情数据
+        const storyData = {
+            "1": {
+                "scene": "scene-plaza",
+                "characters": ["qingxue"],
+                "dialogues": [
+                    {"speaker": "旁白", "text": "青云宗，外门广场。\n\n数百名弟子围成一圈，目光都聚焦在中央的两人身上。"},
+                    {"speaker": "苏清雪", "text": "林萧，这婚约，我今日必须解除。"},
+                    {"speaker": "旁白", "text": "苏清雪一袭白衣，容颜绝美，但语气冰冷得没有一丝感情。"},
+                    {"speaker": "林萧", "text": "苏清雪，你当真要如此绝情？"},
+                    {"speaker": "苏清雪", "text": "道不同，不相为谋。\n\n我即将突破金丹，而你，还停留在炼气三层。\n\n我们，已经不是同一个世界的人了。"},
+                    {"speaker": "旁白", "text": "周围响起阵阵窃笑声。"},
+                    {"speaker": "林萧", "text": "好。这婚约，我同意解除。\n\n但是——三年之后，我会亲自登上青云宗，挑战你。\n\n若我胜，婚约继续。若我败，从此陌路。"},
+                    {"speaker": "苏清雪", "text": "好，我等你。"}
+                ],
+                "choices": [
+                    {"text": "跟随老乞丐", "next": "2a"},
+                    {"text": "警惕询问", "next": "2b"},
+                    {"text": "转身离开", "next": "2c"}
+                ]
+            },
+            "2a": {
+                "scene": "scene-cave",
+                "characters": ["beggar"],
+                "dialogues": [
+                    {"speaker": "旁白", "text": "林萧跟随老乞丐来到后山一处偏僻的山洞前。"},
+                    {"speaker": "老乞丐", "text": "我是谁不重要，重要的是，我能帮你觉醒血脉。"},
+                    {"speaker": "旁白", "text": "老乞丐抬手一挥，山洞入口的石门缓缓打开。"},
+                    {"speaker": "老乞丐", "text": "这是你林家祖传的功法——《太古神龙诀》。"}
+                ],
+                "choices": [
+                    {"text": "立即开始修炼", "next": "3a"},
+                    {"text": "先询问详情", "next": "3b"},
+                    {"text": "感谢老乞丐", "next": "3c"}
+                ]
+            },
+            "2b": {
+                "scene": "scene-plaza",
+                "characters": ["beggar"],
+                "dialogues": [
+                    {"speaker": "旁白", "text": "老乞丐从怀里掏出一块玉佩，扔给林萧。"},
+                    {"speaker": "老乞丐", "text": "你父亲给我的信物。"},
+                    {"speaker": "老乞丐", "text": "他说过，如果你见到这块玉佩，就可以信任我。"}
+                ],
+                "choices": [
+                    {"text": "跟随老乞丐", "next": "3a"},
+                    {"text": "拒绝，自己修炼", "next": "3d"},
+                    {"text": "追问仇人身份", "next": "3e"}
+                ]
+            },
+            "2c": {
+                "scene": "scene-bamboo",
+                "characters": ["linxiao"],
+                "dialogues": [
+                    {"speaker": "旁白", "text": "林萧决定靠自己的努力修行。"},
+                    {"speaker": "老乞丐", "text": "好！有骨气！老夫就喜欢你这样的！"},
+                    {"speaker": "旁白", "text": "老乞丐从怀里掏出一本破旧的小册子，扔给林萧。"}
+                ],
+                "choices": [
+                    {"text": "闭关修炼", "next": "3f"},
+                    {"text": "先去藏书阁", "next": "3g"},
+                    {"text": "找修炼场地", "next": "3h"}
+                ]
+            }
+        };
+
+        // 游戏状态
+        let gameState = {
+            currentChapter: "1",
+            currentDialogue: 0,
+            isTyping: false,
+            typingTimer: null
+        };
+
+        // 逐字显示对话框（带完成回调）
+        function typeWriter(text, element, speed = 30, callback) {
+            let i = 0;
+            element.innerHTML = "";
+            gameState.isTyping = true;
+            document.getElementById('continueHint').textContent = "点击跳过...";
+            
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    gameState.typingTimer = setTimeout(type, speed);
+                    // 自动滚动到底部
+                    const dialogueBox = document.querySelector('.dialogue-box');
+                    dialogueBox.scrollTop = dialogueBox.scrollHeight;
+                } else {
+                    gameState.isTyping = false;
+                    document.getElementById('continueHint').textContent = "点击继续 ▼";
+                    if (callback) callback();
+                }
+            }
+            
+            type();
+        }
+
+        // 立即显示完整文本
+        function showFullText(text, element) {
+            if (gameState.typingTimer) {
+                clearTimeout(gameState.typingTimer);
+            }
+            element.innerHTML = text.replace(/\n/g, '<br>');
+            gameState.isTyping = false;
+            document.getElementById('continueHint').textContent = "点击继续 ▼";
+            // 滚动到底部
+            const dialogueBox = document.querySelector('.dialogue-box');
+            dialogueBox.scrollTop = dialogueBox.scrollHeight;
+        }
+
+        // 渲染场景
+        function renderScene(sceneId) {
+            const scene = storyData[sceneId];
+            if (!scene) {
+                console.error('Scene not found:', sceneId);
+                return;
+            }
+            
+            // 更新场景背景
+            const sceneLayer = document.getElementById('sceneLayer');
+            sceneLayer.className = 'scene-layer ' + scene.scene;
+            
+            // 更新角色
+            const characterLayer = document.getElementById('characterLayer');
+            characterLayer.innerHTML = '';
+            
+            scene.characters.forEach((char, index) => {
+                const charDiv = document.createElement('div');
+                charDiv.className = `character char-${char} slide-in-${index % 2 === 0 ? 'left' : 'right'}`;
+                charDiv.innerHTML = getCharacterHTML(char);
+                characterLayer.appendChild(charDiv);
+            });
+            
+            // 重置对话索引
+            gameState.currentDialogue = 0;
+            
+            // 隐藏选择按钮
+            const choicesLayer = document.getElementById('choicesLayer');
+            choicesLayer.style.display = 'none';
+            choicesLayer.innerHTML = '';
+            
+            // 显示第一段对话
+            showDialogue();
+        }
+
+        // 获取角色 HTML
+        function getCharacterHTML(charType) {
+            if (charType === 'linxiao') {
+                return `
+                    <div class="aura"></div>
+                    <div class="head">
+                        <div class="hair"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                    </div>
+                    <div class="body">
+                        <div class="robe-decoration"></div>
+                    </div>
+                    <div class="legs"></div>
+                `;
+            } else if (charType === 'qingxue') {
+                return `
+                    <div class="aura-white"></div>
+                    <div class="head">
+                        <div class="hair">
+                            <div class="hair-ornament"></div>
+                        </div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                    </div>
+                    <div class="body">
+                        <div class="robe-sleeves"></div>
+                    </div>
+                    <div class="legs"></div>
+                `;
+            } else if (charType === 'beggar') {
+                return `
+                    <div class="head">
+                        <div class="hair"></div>
+                        <div class="beard"></div>
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                    </div>
+                    <div class="body">
+                        <div class="robe-patches">
+                            <div class="patch"></div>
+                            <div class="patch"></div>
+                            <div class="patch"></div>
+                        </div>
+                        <div class="gourd"></div>
+                    </div>
+                    <div class="legs"></div>
+                `;
+            }
+            return '';
+        }
+
+        // 显示对话
+        function showDialogue() {
+            const scene = storyData[gameState.currentChapter];
+            if (!scene) {
+                console.error('Scene data not found for chapter:', gameState.currentChapter);
+                return;
+            }
+            
+            // 检查是否所有对话已结束
+            if (gameState.currentDialogue >= scene.dialogues.length) {
+                // 所有对话结束，显示选择按钮
+                showChoices(scene.choices);
+                return;
+            }
+            
+            const dialogue = scene.dialogues[gameState.currentDialogue];
+            const speakerName = document.getElementById('speakerName');
+            const dialogueText = document.getElementById('dialogueText');
+            
+            speakerName.textContent = dialogue.speaker;
+            
+            // 逐字显示，完成后允许继续
+            typeWriter(dialogue.text, dialogueText, 30, () => {
+                // 打字完成
+            });
+            
+            gameState.currentDialogue++;
+        }
+
+        // 显示选择按钮
+        function showChoices(choices) {
+            const choicesLayer = document.getElementById('choicesLayer');
+            choicesLayer.innerHTML = '';
+            
+            if (!choices || choices.length === 0) {
+                console.warn('No choices available');
+                return;
+            }
+            
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn fade-in';
+                btn.textContent = choice.text;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    makeChoice(choice.next);
+                };
+                choicesLayer.appendChild(btn);
+            });
+            
+            // 显示选择按钮
+            choicesLayer.style.display = 'flex';
+            document.getElementById('continueHint').textContent = "";
+        }
+
+        // 做出选择
+        function makeChoice(nextChapter) {
+            gameState.currentChapter = nextChapter;
+            gameState.currentDialogue = 0;
+            document.getElementById('chapterNum').textContent = nextChapter.replace(/[a-z]/, '');
+            
+            // 渲染新场景
+            renderScene(nextChapter);
+        }
+
+        // 点击容器处理
+        document.getElementById('gameContainer').onclick = (e) => {
+            // 忽略按钮点击
+            if (e.target.classList.contains('choice-btn')) return;
+            if (e.target.classList.contains('menu-btn')) return;
+            if (e.target.closest('.choices-layer')) return;
+            
+            const scene = storyData[gameState.currentChapter];
+            if (!scene) return;
+            
+            // 如果正在打字，立即显示完整文本
+            if (gameState.isTyping) {
+                const currentDlg = scene.dialogues[gameState.currentDialogue - 1];
+                if (currentDlg) {
+                    showFullText(currentDlg.text, document.getElementById('dialogueText'));
+                }
+                return;
+            }
+            
+            // 如果对话还没显示完，显示下一段
+            if (gameState.currentDialogue <= scene.dialogues.length) {
+                showDialogue();
+            }
+        };
+
+        // 菜单功能
+        function toggleMenu() {
+            alert('菜单功能开发中...\n\n当前章节：' + gameState.currentChapter);
+        }
+
+        // 初始化
+        window.onload = () => {
+            console.log('Visual novel loaded');
+            renderScene("1");
+        };
+    </script>
+</body>
+</html>
