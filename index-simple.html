@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仙门试炼 - AI 互动小说</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px 20px;
+        }
+        
+        .chapter-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .chapter-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+        
+        .chapter-progress {
+            font-size: 14px;
+            color: #636e72;
+        }
+        
+        .story-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #2d3436;
+            margin-bottom: 30px;
+            white-space: pre-line;
+        }
+        
+        .story-text p {
+            margin-bottom: 15px;
+        }
+        
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .choice-btn {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .choice-btn:active {
+            transform: translateY(0);
+        }
+        
+        .restart-btn {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: #f0f0f0;
+            color: #636e72;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #636e72;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #636e72;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 仙门试炼</h1>
+            <p>AI 互动小说 · 你的选择决定命运</p>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>正在加载剧情...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 预设剧情数据（MVP 版本）
+        const storyData = {
+            "1": {
+                "title": "第 1 章 退婚之辱",
+                "content": `青云宗，外门广场。
+
+数百名弟子围成一圈，目光都聚焦在中央的两人身上。
+
+"林萧，这婚约，我今日必须解除。"
+
+苏清雪一袭白衣，容颜绝美，但语气冰冷得没有一丝感情。
+
+林萧握紧拳头，指节发白。
+
+三年前，他是青云宗最耀眼的天才，十岁筑基，震惊整个修仙界。然而一年后，他的修为突然停滞不前，血脉之力也消失不见。
+
+从那天起，嘲笑、讽刺、鄙夷，如同潮水般涌来。
+
+"苏清雪，你当真要如此绝情？"林萧的声音有些沙哑。
+
+"道不同，不相为谋。"苏清雪淡淡说道，"我即将突破金丹，而你，还停留在炼气三层。我们，已经不是同一个世界的人了。"
+
+周围响起阵阵窃笑声。
+
+"废物也配和圣女有婚约？"
+"早就该退了！"
+"听说他父亲当年也是被陷害致死的，真是晦气..."
+
+林萧没有理会周围的嘲讽，他只是静静地看着苏清雪，眼中闪过一丝复杂的情绪。
+
+"好。"林萧忽然笑了，"这婚约，我同意解除。"
+
+苏清雪微微一愣，似乎没想到林萧会答应得如此干脆。
+
+"但是——"林萧话锋一转，"三年之后，我会亲自登上青云宗，挑战你。若我胜，婚约继续。若我败，从此陌路。"
+
+全场哗然。
+
+"三年？他居然说三年？"
+"笑话！三年后苏圣女早就金丹大成了！"
+"废柴就是废柴，只会说大话..."
+
+苏清雪深深看了林萧一眼，转身离去。
+
+"好，我等你。"
+
+她的声音随风飘来，却如同一记重锤，砸在林萧心上。
+
+待人群散去，林萧独自站在广场上，望着天空。
+
+"父亲，您说过，咱们林家的血脉，迟早会觉醒的。"
+
+"三年，足够了。"
+
+就在这时，一个苍老的声音在他身后响起：
+
+"小子，想变强吗？"
+
+林萧猛然回头，只见一个衣衫褴褛的老乞丐，正笑眯眯地看着他...`,
+                "choices": [
+                    {"text": "跟随老乞丐", "next": "2a"},
+                    {"text": "警惕询问", "next": "2b"},
+                    {"text": "转身离开", "next": "2c"}
+                ]
+            },
+            "2a": {
+                "title": "第 2 章 神秘传承",
+                "content": `林萧警惕地看着老乞丐："前辈是何人？"
+
+老乞丐嘿嘿一笑，从怀里掏出一个破旧的酒葫芦，灌了一口酒。
+
+"我是谁不重要，重要的是，我能帮你觉醒血脉。"
+
+林萧心中一震："前辈如何得知我的血脉？"
+
+"何止得知。"老乞丐眼中闪过一丝精光，"你父亲林战，曾救过我一命。他临终前托付我，若你血脉三年未醒，便让我带你去一个地方。"
+
+林萧瞳孔骤缩："父亲临终前...您见过我父亲？"
+
+老乞丐沉默片刻，叹了口气："当年你父亲被陷害，我没能及时赶到。这是我一生的遗憾。"
+
+"走，跟我来。"
+
+林萧犹豫了一下，还是跟上了老乞丐的脚步。
+
+两人来到后山一处偏僻的山洞前。老乞丐抬手一挥，山洞入口的石门缓缓打开。
+
+"这里是..."林萧震惊地看着山洞内部。
+
+只见洞壁上刻满了古老的符文，中央有一个巨大的石台，石台上悬浮着一本金色的古籍。
+
+"这是..."林萧感到体内的血脉开始躁动。
+
+"这是你林家祖传的功法——《太古神龙诀》。"老乞丐缓缓说道，"修炼此功法，可觉醒上古龙族血脉。"
+
+林萧深吸一口气，走向石台。
+
+就在他的手触碰到古籍的瞬间，一股庞大的信息涌入脑海。
+
+同时，他感到体内有一股炽热的力量开始涌动...`,
+                "choices": [
+                    {"text": "立即开始修炼", "next": "3a"},
+                    {"text": "先询问详情", "next": "3b"},
+                    {"text": "感谢老乞丐", "next": "3c"}
+                ]
+            },
+            "2b": {
+                "title": "第 2 章 神秘身份",
+                "content": `林萧没有贸然跟随，而是警惕地问道："前辈如何证明自己的身份？"
+
+老乞丐眼中闪过一丝赞赏："谨慎是好事。"
+
+他伸手从怀里掏出一块玉佩，扔给林萧。
+
+林萧接住玉佩，顿时浑身一震。
+
+这块玉佩他见过！父亲生前一直佩戴，去世后就失踪了。
+
+"这玉佩..."林萧声音有些颤抖。
+
+"你父亲给我的信物。"老乞丐缓缓说道，"他说过，如果你见到这块玉佩，就可以信任我。"
+
+林萧握紧玉佩，眼眶微红："前辈，我父亲他...到底是怎么死的？"
+
+老乞丐沉默片刻："现在还不是告诉你的时候。等你实力足够了，自然会有人来找你。"
+
+"现在，你只需要知道，你的仇人很强大，强大到你无法想象。"
+
+林萧深吸一口气，压下心中翻涌的情绪："那前辈能帮我什么？"
+
+"帮你觉醒血脉，传授你功法。"老乞丐说，"但修行之路上，只能靠你自己。"
+
+"跟我来吧。"`,
+                "choices": [
+                    {"text": "跟随老乞丐", "next": "3a"},
+                    {"text": "拒绝，自己修炼", "next": "3d"},
+                    {"text": "追问仇人身份", "next": "3e"}
+                ]
+            },
+            "2c": {
+                "title": "第 2 章 独自修行",
+                "content": `林萧看着老乞丐，摇了摇头："多谢前辈好意，但我想靠自己的努力。"
+
+老乞丐愣了一下，随即哈哈大笑："好！有骨气！老夫就喜欢你这样的！"
+
+"不过——"老乞丐话锋一转，"修行路上，闭门造车可不行。"
+
+他从怀里掏出一本破旧的小册子，扔给林萧。
+
+"这是最基础的炼气功法，虽然普通，但胜在扎实。你先把这个练好，再考虑其他的。"
+
+林萧接住小册子，恭敬地行了一礼："多谢前辈！"
+
+"不必谢我。"老乞丐摆摆手，"要谢就谢你自己的骨气。记住，修行路上，宁可慢，不可急。根基扎实，才能走得更远。"
+
+说完，老乞丐转身离去，转眼就消失在夜色中。
+
+林萧站在原地，看着手中的小册子，心中涌起一股暖流。
+
+"父亲，我不会让您失望的。"
+
+他回到自己的小屋，开始按照小册子上的方法修炼...`,
+                "choices": [
+                    {"text": "闭关修炼", "next": "3f"},
+                    {"text": "先去藏书阁", "next": "3g"},
+                    {"text": "找修炼场地", "next": "3h"}
+                ]
+            },
+            "3a": {
+                "title": "第 3 章 血脉觉醒（分支 A）",
+                "content": `林萧盘腿坐在石台上，按照《太古神龙诀》的方法开始运转灵力。
+
+渐渐地，他感到体内有一股炽热的力量开始苏醒。
+
+那是一条金色的龙影，在他的经脉中游走。
+
+"吼——"
+
+龙吟声在林萧脑海中响起，他感到全身的骨骼都在发出噼里啪啦的响声。
+
+"这是...血脉觉醒！"老乞丐惊喜地看着林萧。
+
+金色的光芒从林萧体内迸发，照亮了整个山洞。
+
+一个时辰后，光芒渐渐收敛。
+
+林萧睁开双眼，眼中闪过一丝金色的光芒。
+
+"感觉如何？"老乞丐问道。
+
+林萧握紧拳头，感受着体内澎湃的力量："炼气五层！我突破了！"
+
+"而且，还不止。"老乞丐笑着说，"你觉醒的是上古龙族血脉中最尊贵的——金龙血脉。"
+
+"从今以后，你的修炼速度会是常人的十倍！"
+
+林萧深吸一口气，跪在地上："多谢前辈再造之恩！"
+
+"起来吧。"老乞丐扶起他，"记住，今天的事不要告诉任何人。你的仇人就在青云宗，要小心。"
+
+林萧瞳孔骤缩："仇人在青云宗？是谁？"
+
+"时机未到，我不能说。"老乞丐摇头，"等你到了金丹期，自然会有人来找你。"
+
+"现在，你先回去，假装什么都没有发生。三年后的今天，来这里找我。"
+
+说完，老乞丐的身影渐渐淡去，消失不见。
+
+林萧站在山洞中，握紧拳头。
+
+"三年...我一定会找到答案的。"`,
+                "choices": [
+                    {"text": "返回宗门", "next": "4a"},
+                    {"text": "继续修炼", "next": "4b"},
+                    {"text": "探索山洞", "next": "4c"}
+                ]
+            },
+            "3b": {
+                "title": "第 3 章 详细询问（分支 B）",
+                "content": `林萧没有立即开始修炼，而是问道："前辈，这功法有什么风险吗？"
+
+老乞丐眼中闪过一丝赞赏："问得好。任何强大的功法都有风险，《太古神龙诀》也不例外。"
+
+"最大的风险，就是血脉反噬。如果你的意志力不够坚定，可能会被龙族血脉中的暴戾之气控制。"
+
+林萧点头："那我该如何避免？"
+
+"修心。"老乞丐说，"在修炼功法之前，先要修炼心境。我教你一个静心法门。"
+
+老乞丐传授了林萧一套静心法决。
+
+林萧按照法决运转，渐渐地，心中一片清明。
+
+"很好。"老乞丐满意地点头，"你现在可以开始修炼了。"
+
+林萧再次看向那本金色古籍，深吸一口气，伸手触碰...`,
+                "choices": [
+                    {"text": "开始修炼", "next": "3a"},
+                    {"text": "继续询问", "next": "3i"},
+                    {"text": "先回去准备", "next": "3j"}
+                ]
+            }
+        };
+
+        // 游戏状态
+        let gameState = {
+            currentChapter: "1",
+            stats: {
+                level: 1,
+                cultivation: "炼气三层",
+                choices: 0
+            }
+        };
+
+        // 从本地存储加载进度
+        function loadProgress() {
+            const saved = localStorage.getItem('novelProgress');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+        }
+
+        // 保存进度到本地存储
+        function saveProgress() {
+            localStorage.setItem('novelProgress', JSON.stringify(gameState));
+        }
+
+        // 渲染章节
+        function renderChapter(chapterId) {
+            const chapter = storyData[chapterId];
+            if (!chapter) {
+                document.getElementById('content').innerHTML = `
+                    <div class="content">
+                        <div class="story-text">
+                            <p>📴 剧情开发中，敬请期待...</p>
+                        </div>
+                        <button class="restart-btn" onclick="restartGame()">重新开始</button>
+                    </div>
+                `;
+                return;
+            }
+
+            gameState.currentChapter = chapterId;
+            gameState.stats.choices++;
+            saveProgress();
+
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">修为</div>
+                        <div class="stat-value">${gameState.stats.cultivation}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">选择次数</div>
+                        <div class="stat-value">${gameState.stats.choices}</div>
+                    </div>
+                </div>
+                
+                <div class="chapter-info">
+                    <div class="chapter-title">${chapter.title}</div>
+                </div>
+                
+                <div class="story-text">
+                    ${chapter.content.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('')}
+                </div>
+                
+                <div class="choices">
+                    ${chapter.choices.map((choice, index) => `
+                        <button class="choice-btn" onclick="makeChoice('${choice.next}')">
+                            【${String.fromCharCode(65 + index)}】${choice.text}
+                        </button>
+                    `).join('')}
+                </div>
+                
+                <button class="restart-btn" onclick="restartGame()">重新开始</button>
+            `;
+        }
+
+        // 做出选择
+        function makeChoice(nextChapter) {
+            // 添加简单的过渡动画
+            const content = document.getElementById('content');
+            content.style.opacity = '0';
+            
+            setTimeout(() => {
+                renderChapter(nextChapter);
+                content.style.opacity = '1';
+            }, 300);
+        }
+
+        // 重新开始
+        function restartGame() {
+            gameState = {
+                currentChapter: "1",
+                stats: {
+                    level: 1,
+                    cultivation: "炼气三层",
+                    choices: 0
+                }
+            };
+            saveProgress();
+            renderChapter("1");
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            renderChapter(gameState.currentChapter);
+        });
+    </script>
+</body>
+</html>
