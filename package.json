@@ -1,0 +1,10 @@
+{
+  "name": "ai-interactive-novel",
+  "version": "1.0.0",
+  "description": "AI 互动小说 - H5 版",
+  "scripts": {
+    "dev": "echo 'Static site - open index.html directly'",
+    "build": "echo 'Static site - no build needed'",
+    "start": "echo 'Static site - open index.html directly'"
+  }
+}
