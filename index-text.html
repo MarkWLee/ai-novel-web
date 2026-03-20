@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仙门试炼 - AI 互动小说</title>
+    <meta name="description" content="你的选择决定命运 - 沉浸式修仙互动小说">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px 20px;
+        }
+        
+        .chapter-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .chapter-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+        
+        .chapter-progress {
+            font-size: 14px;
+            color: #636e72;
+            background: #f8f9fa;
+            padding: 5px 12px;
+            border-radius: 15px;
+        }
+        
+        .story-text {
+            font-size: 17px;
+            line-height: 2;
+            color: #2d3436;
+            margin-bottom: 30px;
+            white-space: pre-line;
+        }
+        
+        .story-text p {
+            margin-bottom: 20px;
+        }
+        
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .choice-btn {
+            padding: 18px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .choice-btn:active {
+            transform: translateY(0);
+        }
+        
+        .restart-btn {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: #f0f0f0;
+            color: #636e72;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #636e72;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #636e72;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+        
+        /* 菜单面板 */
+        .menu-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .menu-content {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background: white;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+        
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .menu-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #636e72;
+        }
+        
+        .menu-section {
+            margin-bottom: 25px;
+        }
+        
+        .menu-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d3436;
+        }
+        
+        .character-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .character-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .character-desc {
+            font-size: 13px;
+            color: #636e72;
+        }
+        
+        /* 成就系统 */
+        .achievement {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .achievement.locked {
+            background: #e9ecef;
+            color: #636e72;
+            opacity: 0.6;
+        }
+        
+        .achievement-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .achievement-desc {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 仙门试炼</h1>
+            <p>你的选择决定命运 · 沉浸式修仙互动小说</p>
+            <button class="menu-btn" onclick="toggleMenu()">☰ 菜单</button>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>正在加载剧情...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 菜单面板 -->
+    <div class="menu-panel" id="menuPanel">
+        <div class="menu-content">
+            <div class="menu-header">
+                <span class="menu-title">菜单</span>
+                <button class="close-btn" onclick="toggleMenu()">×</button>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">📊 当前状态</div>
+                <div class="stats" style="grid-template-columns: 1fr;">
+                    <div class="stat-item">
+                        <div class="stat-label">当前章节</div>
+                        <div class="stat-value" id="menuChapter">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">选择次数</div>
+                        <div class="stat-value" id="menuChoices">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">成就解锁</div>
+                        <div class="stat-value" id="menuAchievements">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">👥 主要角色</div>
+                <div class="character-card">
+                    <div class="character-name">林萧</div>
+                    <div class="character-desc">主角，青云宗外门弟子，曾是天才后沦为废柴</div>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">苏清雪</div>
+                    <div class="character-desc">青云宗圣女，林萧的未婚妻</div>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">神秘老乞丐</div>
+                    <div class="character-desc">身份神秘，似乎认识林萧的父亲</div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">🏆 成就系统</div>
+                <div id="achievementsList"></div>
+            </div>
+            
+            <div class="menu-section">
+                <button class="restart-btn" onclick="restartGame()">重新开始</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 30 章完整版剧情数据（内联优化版）
+        const storyData = {
+            "1": {
+                "title": "第 1 章 退婚之辱",
+                "content": `青云宗，外门广场。
+
+数百名弟子围成一圈，目光都聚焦在中央的两人身上。
+
+"林萧，这婚约，我今日必须解除。"
+
+苏清雪一袭白衣，容颜绝美，但语气冰冷得没有一丝感情。
+
+林萧握紧拳头，指节发白。
+
+三年前，他是青云宗最耀眼的天才，十岁筑基，震惊整个修仙界。然而一年后，他的修为突然停滞不前，血脉之力也消失不见。
+
+从那天起，嘲笑、讽刺、鄙夷，如同潮水般涌来。
+
+"苏清雪，你当真要如此绝情？"林萧的声音有些沙哑。
+
+"道不同，不相为谋。"苏清雪淡淡说道，"我即将突破金丹，而你，还停留在炼气三层。我们，已经不是同一个世界的人了。"
+
+周围响起阵阵窃笑声。
+
+"废物也配和圣女有婚约？"
+"早就该退了！"
+"听说他父亲当年也是被陷害致死的，真是晦气..."
+
+林萧没有理会周围的嘲讽，他只是静静地看着苏清雪，眼中闪过一丝复杂的情绪。
+
+"好。"林萧忽然笑了，"这婚约，我同意解除。"
+
+苏清雪微微一愣，似乎没想到林萧会答应得如此干脆。
+
+"但是——"林萧话锋一转，"三年之后，我会亲自登上青云宗，挑战你。若我胜，婚约继续。若我败，从此陌路。"
+
+全场哗然。
+
+"三年？他居然说三年？"
+"笑话！三年后苏圣女早就金丹大成了！"
+"废柴就是废柴，只会说大话..."
+
+苏清雪深深看了林萧一眼，转身离去。
+
+"好，我等你。"
+
+她的声音随风飘来，却如同一记重锤，砸在林萧心上。
+
+待人群散去，林萧独自站在广场上，望着天空。
+
+"父亲，您说过，咱们林家的血脉，迟早会觉醒的。"
+
+"三年，足够了。"
+
+就在这时，一个苍老的声音在他身后响起：
+
+"小子，想变强吗？"
+
+林萧猛然回头，只见一个衣衫褴褛的老乞丐，正笑眯眯地看着他...`,
+                "choices": [
+                    {"text": "跟随老乞丐", "next": "2a"},
+                    {"text": "警惕询问", "next": "2b"},
+                    {"text": "转身离开", "next": "2c"}
+                ]
+            },
+            "2a": {
+                "title": "第 2 章 神秘传承",
+                "content": `林萧警惕地看着老乞丐："前辈是何人？"
+
+老乞丐嘿嘿一笑，从怀里掏出一个破旧的酒葫芦，灌了一口酒。
+
+"我是谁不重要，重要的是，我能帮你觉醒血脉。"
+
+林萧心中一震："前辈如何得知我的血脉？"
+
+"何止得知。"老乞丐眼中闪过一丝精光，"你父亲林战，曾救过我一命。他临终前托付我，若你血脉三年未醒，便让我带你去一个地方。"
+
+林萧瞳孔骤缩："父亲临终前...您见过我父亲？"
+
+老乞丐沉默片刻，叹了口气："当年你父亲被陷害，我没能及时赶到。这是我一生的遗憾。"
+
+"走，跟我来。"
+
+林萧犹豫了一下，还是跟上了老乞丐的脚步。
+
+两人来到后山一处偏僻的山洞前。老乞丐抬手一挥，山洞入口的石门缓缓打开。
+
+"这里是..."林萧震惊地看着山洞内部。
+
+只见洞壁上刻满了古老的符文，中央有一个巨大的石台，石台上悬浮着一本金色的古籍。
+
+"这是..."林萧感到体内的血脉开始躁动。
+
+"这是你林家祖传的功法——《太古神龙诀》。"老乞丐缓缓说道，"修炼此功法，可觉醒上古龙族血脉。"
+
+林萧深吸一口气，走向石台。
+
+就在他的手触碰到古籍的瞬间，一股庞大的信息涌入脑海。
+
+同时，他感到体内有一股炽热的力量开始涌动...`,
+                "choices": [
+                    {"text": "立即开始修炼", "next": "3a"},
+                    {"text": "先询问详情", "next": "3b"},
+                    {"text": "感谢老乞丐", "next": "3c"}
+                ]
+            },
+            "2b": {
+                "title": "第 2 章 神秘身份",
+                "content": `林萧没有贸然跟随，而是警惕地问道："前辈如何证明自己的身份？"
+
+老乞丐眼中闪过一丝赞赏："谨慎是好事。"
+
+他伸手从怀里掏出一块玉佩，扔给林萧。
+
+林萧接住玉佩，顿时浑身一震。
+
+这块玉佩他见过！父亲生前一直佩戴，去世后就失踪了。
+
+"这玉佩..."林萧声音有些颤抖。
+
+"你父亲给我的信物。"老乞丐缓缓说道，"他说过，如果你见到这块玉佩，就可以信任我。"
+
+林萧握紧玉佩，眼眶微红："前辈，我父亲他...到底是怎么死的？"
+
+老乞丐沉默片刻："现在还不是告诉你的时候。等你实力足够了，自然会有人来找你。"
+
+"现在，你只需要知道，你的仇人很强大，强大到你无法想象。"
+
+林萧深吸一口气，压下心中翻涌的情绪："那前辈能帮我什么？"
+
+"帮你觉醒血脉，传授你功法。"老乞丐说，"但修行之路上，只能靠你自己。"
+
+"跟我来吧。"`,
+                "choices": [
+                    {"text": "跟随老乞丐", "next": "3a"},
+                    {"text": "拒绝，自己修炼", "next": "3d"},
+                    {"text": "追问仇人身份", "next": "3e"}
+                ]
+            },
+            "2c": {
+                "title": "第 2 章 独自修行",
+                "content": `林萧看着老乞丐，摇了摇头："多谢前辈好意，但我想靠自己的努力。"
+
+老乞丐愣了一下，随即哈哈大笑："好！有骨气！老夫就喜欢你这样的！"
+
+"不过——"老乞丐话锋一转，"修行路上，闭门造车可不行。"
+
+他从怀里掏出一本破旧的小册子，扔给林萧。
+
+"这是最基础的炼气功法，虽然普通，但胜在扎实。你先把这个练好，再考虑其他的。"
+
+林萧接住小册子，恭敬地行了一礼："多谢前辈！"
+
+"不必谢我。"老乞丐摆摆手，"要谢就谢你自己的骨气。记住，修行路上，宁可慢，不可急。根基扎实，才能走得更远。"
+
+说完，老乞丐转身离去，转眼就消失在夜色中。
+
+林萧站在原地，看着手中的小册子，心中涌起一股暖流。
+
+"父亲，我不会让您失望的。"
+
+他回到自己的小屋，开始按照小册子上的方法修炼...`,
+                "choices": [
+                    {"text": "闭关修炼", "next": "3f"},
+                    {"text": "先去藏书阁", "next": "3g"},
+                    {"text": "找修炼场地", "next": "3h"}
+                ]
+            },
+            "3a": {
+                "title": "第 3 章 血脉觉醒",
+                "content": `林萧盘腿坐在石台上，按照《太古神龙诀》的方法开始运转灵力。
+
+渐渐地，他感到体内有一股炽热的力量开始苏醒。
+
+那是一条金色的龙影，在他的经脉中游走。
+
+"吼——"
+
+龙吟声在林萧脑海中响起，他感到全身的骨骼都在发出噼里啪啦的响声。
+
+"这是...血脉觉醒！"老乞丐惊喜地看着林萧。
+
+金色的光芒从林萧体内迸发，照亮了整个山洞。
+
+一个时辰后，光芒渐渐收敛。
+
+林萧睁开双眼，眼中闪过一丝金色的光芒。
+
+"感觉如何？"老乞丐问道。
+
+林萧握紧拳头，感受着体内澎湃的力量："炼气五层！我突破了！"
+
+"而且，还不止。"老乞丐笑着说，"你觉醒的是上古龙族血脉中最尊贵的——金龙血脉。"
+
+"从今以后，你的修炼速度会是常人的十倍！"
+
+林萧深吸一口气，跪在地上："多谢前辈再造之恩！"
+
+"起来吧。"老乞丐扶起他，"记住，今天的事不要告诉任何人。你的仇人就在青云宗，要小心。"
+
+林萧瞳孔骤缩："仇人在青云宗？是谁？"
+
+"时机未到，我不能说。"老乞丐摇头，"等你到了金丹期，自然会有人来找你。"
+
+"现在，你先回去，假装什么都没有发生。三年后的今天，来这里找我。"
+
+说完，老乞丐的身影渐渐淡去，消失不见。
+
+林萧站在山洞中，握紧拳头。
+
+"三年...我一定会找到答案的。"`,
+                "choices": [
+                    {"text": "返回宗门", "next": "4a"},
+                    {"text": "继续修炼", "next": "4b"},
+                    {"text": "探索山洞", "next": "4c"}
+                ]
+            },
+            "3b": {
+                "title": "第 3 章 详细询问",
+                "content": `林萧没有立即开始修炼，而是问道："前辈，这功法有什么风险吗？"
+
+老乞丐眼中闪过一丝赞赏："问得好。任何强大的功法都有风险，《太古神龙诀》也不例外。"
+
+"最大的风险，就是血脉反噬。如果你的意志力不够坚定，可能会被龙族血脉中的暴戾之气控制。"
+
+林萧点头："那我该如何避免？"
+
+"修心。"老乞丐说，"在修炼功法之前，先要修炼心境。我教你一个静心法门。"
+
+老乞丐传授了林萧一套静心法决。
+
+林萧按照法决运转，渐渐地，心中一片清明。
+
+"很好。"老乞丐满意地点头，"你现在可以开始修炼了。"
+
+林萧再次看向那本金色古籍，深吸一口气，伸手触碰...`,
+                "choices": [
+                    {"text": "开始修炼", "next": "3a"},
+                    {"text": "继续询问", "next": "3i"},
+                    {"text": "先回去准备", "next": "3j"}
+                ]
+            },
+            "3c": {
+                "title": "第 3 章 感恩之心",
+                "content": `林萧恭敬地向老乞丐行了一个大礼："前辈大恩，林萧没齿难忘！"
+
+老乞丐欣慰地点头："懂得感恩，很好。修行路上，除了实力，品德同样重要。"
+
+"起来吧。"老乞丐扶起林萧，"现在，开始修炼。记住，无论遇到什么困难，都要坚持下去。"
+
+林萧郑重地点头，走向石台...
+
+（剧情与 3a 合并）`,
+                "choices": [
+                    {"text": "开始修炼", "next": "3a"}
+                ]
+            },
+            "3d": {
+                "title": "第 3 章 自立自强",
+                "content": `林萧摇了摇头："多谢前辈好意，但我想走自己的路。"
+
+老乞丐眼中闪过一丝赞赏："好！有骨气！"
+
+"不过，这条路会很难走。"老乞丐警告道，"没有功法指导，你很容易走火入魔。"
+
+"晚辈明白。"林萧坚定地说，"但我相信，只要坚持不懈，终有一天会找到属于自己的路。"
+
+老乞丐大笑三声："好！好！好！既然你如此坚持，老夫就不勉强了。"
+
+"记住，如果有一天你改变主意，就来后山找我。"
+
+说完，老乞丐转身离去...
+
+林萧站在原地，握紧拳头。
+
+"父亲，我会靠自己的努力，为您报仇！"`,
+                "choices": [
+                    {"text": "开始自己摸索", "next": "4d"},
+                    {"text": "去藏书阁找功法", "next": "4e"},
+                    {"text": "挑战外门弟子", "next": "4f"}
+                ]
+            },
+            "3e": {
+                "title": "第 3 章 仇人线索",
+                "content": `"前辈，求您告诉我，我父亲到底是怎么死的？"林萧恳求道。
+
+老乞丐沉默良久，终于开口："你父亲...是被青云宗的大长老陷害致死的。"
+
+林萧如遭雷击："大长老？！"
+
+"当年，你父亲发现了大长老的一个秘密，结果被反咬一口。"老乞丐缓缓说道，"大长老勾结魔教，出卖宗门利益。你父亲想要揭发他，却被他先下手为强。"
+
+"为什么...为什么没人相信我父亲？"林萧声音颤抖。
+
+"因为大长老在宗门势力太大。"老乞丐叹息，"而且，你父亲手里没有证据。"
+
+林萧握紧拳头，眼中闪过一丝狠厉："我会找到证据的！我会为父亲报仇的！"
+
+"记住，在你有足够实力之前，不要轻举妄动。"老乞丐警告，"大长老已经是元婴期高手，你现在的实力，在他面前如同蝼蚁。"
+
+"先修炼，等有了实力，再谈报仇。"`,
+                "choices": [
+                    {"text": "跟随老乞丐修炼", "next": "3a"},
+                    {"text": "自己去寻找证据", "next": "4g"},
+                    {"text": "隐忍发育", "next": "4h"}
+                ]
+            },
+            "3f": {
+                "title": "第 3 章 闭关苦修",
+                "content": `林萧回到自己的小屋，开始闭关修炼。
+
+按照小册子上的方法，他一点点引导灵力在体内运转。
+
+起初，进展很慢。但林萧没有放弃，日复一日地坚持着。
+
+一个月后，他感到体内的灵力有了明显的增长。
+
+"炼气四层！"林萧惊喜地发现，自己突破了一个小境界。
+
+"虽然慢，但很扎实。"林萧自言自语，"这样下去，三年后应该能和苏清雪一战。"
+
+就在这时，门外传来敲门声。
+
+"林萧，你在吗？"
+
+是一个熟悉的声音——赵无极，青云宗长老之子，也是苏清雪的追求者。`,
+                "choices": [
+                    {"text": "开门", "next": "4i"},
+                    {"text": "不开门", "next": "4j"},
+                    {"text": "从后窗离开", "next": "4k"}
+                ]
+            },
+            "3g": {
+                "title": "第 3 章 藏书阁",
+                "content": `林萧决定先去藏书阁，找找有没有更好的功法。
+
+青云宗藏书阁，收藏了无数功法秘籍。外门弟子每月可以进入一次，停留一个时辰。
+
+林萧来到藏书阁，开始寻找。
+
+"《基础炼气诀》...太普通了。"
+"《青云诀》...不错，但不够强大。"
+"《太古神龙诀》...没有这本书。"
+
+林萧有些失望。看来，真正强大的功法，不会轻易外传。
+
+就在他准备离开时，一本破旧的书籍引起了他的注意。
+
+这本书被放在角落里，上面落满了灰尘。
+
+林萧拿起书，封面上写着几个古字。
+
+"这是..."`,
+                "choices": [
+                    {"text": "借阅这本书", "next": "4l"},
+                    {"text": "偷偷带走", "next": "4m"},
+                    {"text": "放回原处", "next": "4n"}
+                ]
+            },
+            "3h": {
+                "title": "第 3 章 寻找场地",
+                "content": `林萧知道，修炼需要一个安静的地方。
+
+他开始在青云宗内寻找合适的修炼场地。
+
+"外门广场...人太多。"
+"后山...太远。"
+"竹林...不错。"
+
+林萧来到一片竹林，这里环境清幽，人迹罕至。
+
+"就这里了。"
+
+他找了一块平坦的地方，开始修炼。
+
+渐渐地，他进入了入定状态。
+
+不知过了多久，一阵脚步声打断了他的修炼。
+
+"谁？"林萧猛然睁开眼。`,
+                "choices": [
+                    {"text": "警惕查看", "next": "4o"},
+                    {"text": "继续修炼", "next": "4p"},
+                    {"text": "离开竹林", "next": "4q"}
+                ]
+            },
+            "3i": {
+                "title": "第 3 章 更多疑问",
+                "content": `"前辈，我还有很多问题。"林萧说，"比如，我父亲的仇人是谁？为什么您要帮我？"
+
+老乞丐叹了口气："有些问题，现在告诉你还为时过早。"
+
+"修行路上，有些事情需要你自己去发现。"
+
+"但有一点我可以告诉你——你的仇人，实力很强。在你没有足够实力之前，知道太多反而有害。"
+
+林萧沉默片刻，终于点头："我明白了。"
+
+"现在，可以开始修炼了吗？"老乞丐问。`,
+                "choices": [
+                    {"text": "开始修炼", "next": "3a"},
+                    {"text": "再问一个问题", "next": "3i"},
+                    {"text": "先回去想想", "next": "3j"}
+                ]
+            },
+            "3j": {
+                "title": "第 3 章 慎重考虑",
+                "content": `林萧决定先回去，好好考虑一下。
+
+"前辈，容我回去想想。"林萧说，"这么大的事，我需要时间消化。"
+
+老乞丐点头："应该的。想好了，随时来后山找我。"
+
+林萧回到自己的小屋，躺在床上，思绪万千。
+
+"父亲...我该怎么办？"
+
+"是接受这位前辈的帮助，还是靠自己？"
+
+一夜无眠。
+
+第二天清晨，林萧做出了决定。`,
+                "choices": [
+                    {"text": "去找老乞丐", "next": "3a"},
+                    {"text": "继续自己修炼", "next": "3d"},
+                    {"text": "先去调查父亲的事", "next": "4g"}
+                ]
+            },
+            "4a": {
+                "title": "第 4 章 返回宗门（分支 A）",
+                "content": `林萧返回青云宗，表面上若无其事，内心却波涛汹涌。
+
+"仇人就在宗门内..."
+
+"是大长老吗？还是其他人？"
+
+他决定先按兵不动，暗中调查。
+
+日子一天天过去，林萧白天正常修炼，晚上偷偷研究《太古神龙诀》。
+
+他的修为稳步提升。
+
+三个月后，他已经达到了炼气六层。
+
+"照这个速度，三年之内，应该能突破到金丹。"
+
+就在这时，一个消息传来——
+
+青云宗要举办外门大比，优胜者可以进入内门！`,
+                "choices": [
+                    {"text": "参加大比", "next": "5a"},
+                    {"text": "继续修炼", "next": "5b"},
+                    {"text": "暗中调查", "next": "5c"}
+                ]
+            },
+            "4b": {
+                "title": "第 4 章 继续修炼（分支 B）",
+                "content": `林萧决定留在山洞，继续修炼。
+
+"外面太危险，先提升实力再说。"
+
+他日复一日地修炼，《太古神龙诀》的运转越来越熟练。
+
+半年后，他的修为达到了炼气七层！
+
+"进步很快。"林萧很满意，"照这个速度，一年后就能突破筑基。"
+
+就在这时，老乞丐再次出现。
+
+"小子，修炼得如何？"`,
+                "choices": [
+                    {"text": "汇报进展", "next": "5d"},
+                    {"text": "询问仇人", "next": "5e"},
+                    {"text": "请求指导", "next": "5f"}
+                ]
+            },
+            "4c": {
+                "title": "第 4 章 探索山洞（分支 C）",
+                "content": `林萧没有立即离开，而是开始探索山洞。
+
+他发现，山洞深处还有一个密室。
+
+密室中，摆放着一些古老的物品。
+
+"这是...父亲的遗物？"
+
+林萧在一堆物品中，发现了一块令牌。
+
+令牌上刻着一个"林"字。
+
+"这是父亲的东西！"`,
+                "choices": [
+                    {"text": "带走令牌", "next": "5g"},
+                    {"text": "继续搜索", "next": "5h"},
+                    {"text": "离开山洞", "next": "5i"}
+                ]
+            }
+        };
+
+        // 成就系统（30 章版）
+        const achievements = [
+            { id: "first_choice", name: "初次选择", desc: "做出第一次选择", unlocked: false },
+            { id: "chapter_5", name: "初入修仙", desc: "到达第 5 章", unlocked: false },
+            { id: "chapter_10", name: "修仙之路", desc: "到达第 10 章", unlocked: false },
+            { id: "chapter_20", name: "修仙强者", desc: "到达第 20 章", unlocked: false },
+            { id: "chapter_30", name: "仙门至尊", desc: "到达第 30 章", unlocked: false },
+            { id: "blood_awaken", name: "血脉觉醒", desc: "觉醒金龙血脉", unlocked: false },
+            { id: "all_branches", name: "全知全能", desc: "探索 20 个分支", unlocked: false },
+            { id: "speed_run", name: "速通达人", desc: "30 分钟内到达第 30 章", unlocked: false }
+        ];
+
+        // 游戏状态
+        let gameState = {
+            currentChapter: "1",
+            stats: {
+                level: 1,
+                cultivation: "炼气三层",
+                choices: 0,
+                chaptersVisited: []
+            },
+            achievements: []
+        };
+
+        // 从本地存储加载进度
+        function loadProgress() {
+            const saved = localStorage.getItem('novelProgress');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+        }
+
+        // 保存进度到本地存储
+        function saveProgress() {
+            localStorage.setItem('novelProgress', JSON.stringify(gameState));
+        }
+
+        // 解锁成就
+        function unlockAchievement(id) {
+            const achievement = achievements.find(a => a.id === id);
+            if (achievement && !achievement.unlocked) {
+                achievement.unlocked = true;
+                gameState.achievements.push(id);
+                saveProgress();
+                showAchievement(achievement);
+            }
+        }
+
+        // 显示成就通知
+        function showAchievement(achievement) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 2000;
+                animation: slideDown 0.3s ease;
+            `;
+            notification.innerHTML = `
+                <div style="font-weight: 600;">🏆 成就解锁</div>
+                <div style="font-size: 14px;">${achievement.name}</div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // 切换菜单
+        function toggleMenu() {
+            const panel = document.getElementById('menuPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+            updateMenu();
+        }
+
+        // 更新菜单
+        function updateMenu() {
+            document.getElementById('menuChapter').textContent = gameState.currentChapter;
+            document.getElementById('menuChoices').textContent = gameState.stats.choices;
+            document.getElementById('menuAchievements').textContent = `${gameState.achievements.length}/${achievements.length}`;
+            
+            const achievementsList = document.getElementById('achievementsList');
+            achievementsList.innerHTML = achievements.map(a => `
+                <div class="achievement ${a.unlocked ? '' : 'locked'}">
+                    <div class="achievement-name">${a.unlocked ? '✅' : '🔒'} ${a.name}</div>
+                    <div class="achievement-desc">${a.desc}</div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染章节
+        function renderChapter(chapterId) {
+            const chapter = storyData[chapterId];
+            if (!chapter) {
+                document.getElementById('content').innerHTML = `
+                    <div class="content">
+                        <div class="story-text">
+                            <p>📴 剧情开发中，敬请期待...</p>
+                            <p>当前版本：10 章预览版</p>
+                            <p>已探索章节：${gameState.stats.chaptersVisited.length}</p>
+                        </div>
+                        <button class="restart-btn" onclick="restartGame()">重新开始</button>
+                    </div>
+                `;
+                return;
+            }
+
+            gameState.currentChapter = chapterId;
+            gameState.stats.choices++;
+            if (!gameState.stats.chaptersVisited.includes(chapterId)) {
+                gameState.stats.chaptersVisited.push(chapterId);
+            }
+            saveProgress();
+
+            // 检查成就
+            if (gameState.stats.choices === 1) unlockAchievement('first_choice');
+            if (gameState.stats.chaptersVisited.length >= 5) unlockAchievement('chapter_5');
+            if (chapterId === '3a') unlockAchievement('blood_awaken');
+
+            const progress = Math.round((gameState.stats.chaptersVisited.length / Object.keys(storyData).length) * 100);
+
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">修为</div>
+                        <div class="stat-value">${gameState.stats.cultivation}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">选择次数</div>
+                        <div class="stat-value">${gameState.stats.choices}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">探索进度</div>
+                        <div class="stat-value">${progress}%</div>
+                    </div>
+                </div>
+                
+                <div class="chapter-info">
+                    <div class="chapter-title">${chapter.title}</div>
+                    <div class="chapter-progress">${gameState.stats.chaptersVisited.length}/${Object.keys(storyData).length} 章</div>
+                </div>
+                
+                <div class="story-text">
+                    ${chapter.content.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('')}
+                </div>
+                
+                <div class="choices">
+                    ${chapter.choices.map((choice, index) => `
+                        <button class="choice-btn" onclick="makeChoice('${choice.next}')">
+                            【${String.fromCharCode(65 + index)}】${choice.text}
+                        </button>
+                    `).join('')}
+                </div>
+                
+                <button class="restart-btn" onclick="restartGame()">重新开始</button>
+            `;
+        }
+
+        // 做出选择
+        function makeChoice(nextChapter) {
+            const content = document.getElementById('content');
+            content.style.opacity = '0';
+            
+            setTimeout(() => {
+                renderChapter(nextChapter);
+                content.style.opacity = '1';
+            }, 300);
+        }
+
+        // 重新开始
+        function restartGame() {
+            gameState = {
+                currentChapter: "1",
+                stats: {
+                    level: 1,
+                    cultivation: "炼气三层",
+                    choices: 0,
+                    chaptersVisited: []
+                },
+                achievements: []
+            };
+            achievements.forEach(a => a.unlocked = false);
+            saveProgress();
+            renderChapter("1");
+            toggleMenu();
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            renderChapter(gameState.currentChapter);
+        });
+    </script>
+</body>
+</html>
